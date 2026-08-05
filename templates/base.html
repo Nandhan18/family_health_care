@@ -1,0 +1,115 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Family Care - Health Management{% endblock %}</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eefbfa',
+                            100: '#d5f7f3',
+                            500: '#0d9488',
+                            600: '#0f766e',
+                            700: '#115e59',
+                            900: '#134e4a',
+                        },
+                        accent: {
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- External CSS Static File -->
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="text-slate-800 antialiased flex flex-col min-h-screen">
+    <!-- Header -->
+    <header class="sticky top-0 z-40 glass-nav">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'landing' %}{% endif %}" class="flex items-center gap-2.5 group">
+                    <div class="w-10 h-10 rounded-xl gradient-accent flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
+                        <i data-lucide="heart-pulse" class="w-6 h-6"></i>
+                    </div>
+                    <span class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-teal-700 to-indigo-600 bg-clip-text text-transparent">Family Care</span>
+                </a>
+
+                {% if user.is_authenticated %}
+                <!-- Authenticated Desktop Nav Links -->
+                <nav class="hidden md:flex items-center space-x-1 lg:space-x-2">
+                    <a href="{% url 'dashboard' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-teal-600 hover:bg-teal-50 transition">Dashboard</a>
+                    <a href="{% url 'family_members' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-teal-600 hover:bg-teal-50 transition">Members</a>
+                    <a href="{% url 'medical_records' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-teal-600 hover:bg-teal-50 transition">Records</a>
+                    <a href="{% url 'medicines' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-teal-600 hover:bg-teal-50 transition">Medicines</a>
+                    <a href="{% url 'appointments' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-teal-600 hover:bg-teal-50 transition">Appointments</a>
+                    <a href="{% url 'health_analytics' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-teal-600 hover:bg-teal-50 transition">Vitals</a>
+                    <a href="{% url 'ai_predictions' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-indigo-600 hover:bg-indigo-50 transition flex items-center gap-1">
+                        <i data-lucide="sparkles" class="w-4 h-4"></i> AI Insights
+                    </a>
+                    <a href="{% url 'emergency' %}" class="px-3 py-2 rounded-lg text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 transition flex items-center gap-1 border border-red-200">
+                        <i data-lucide="alert-triangle" class="w-4 h-4"></i> SOS
+                    </a>
+                </nav>
+
+                <!-- User Profile & Logout -->
+                <div class="flex items-center gap-3">
+                    <span class="text-xs font-medium text-slate-500 hidden sm:inline-block">Logged in as <strong class="text-slate-700">{{ user.username }}</strong></span>
+                    <a href="{% url 'logout' %}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">
+                        <i data-lucide="log-out" class="w-4 h-4"></i> Logout
+                    </a>
+                </div>
+                {% else %}
+                <!-- Public Header Actions -->
+                <div class="flex items-center gap-3">
+                    <a href="{% url 'login' %}" class="px-4 py-2 rounded-lg text-xs font-bold text-slate-700 hover:text-teal-600 transition">Sign In</a>
+                    <a href="{% url 'signup' %}" class="px-4 py-2 rounded-xl text-xs font-bold text-white gradient-accent shadow-md hover:shadow-lg transition">Get Started Free</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Flash Messages -->
+    {% if messages %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+        {% for message in messages %}
+        <div class="p-4 rounded-xl mb-3 border text-sm font-medium flex items-center justify-between shadow-sm {% if message.tags == 'error' %}bg-red-50 text-red-700 border-red-200{% else %}bg-teal-50 text-teal-800 border-teal-200{% endif %}">
+            <div class="flex items-center gap-2">
+                <i data-lucide="{% if message.tags == 'error' %}alert-circle{% else %}check-circle-2{% endif %}" class="w-5 h-5"></i>
+                <span>{{ message }}</span>
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content Body -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto border-t border-slate-200 bg-white/50 backdrop-blur py-6 text-center text-xs text-slate-500">
+        <p>&copy; {% now "Y" %} Family Care Health System Designed &amp; Developed by <strong class="text-slate-700 font-bold">Nandhan</strong></p>
+    </footer>
+
+    <!-- External JS Static File -->
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
