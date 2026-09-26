@@ -13,15 +13,15 @@
             <p class="text-xs text-slate-500 mt-1">Manage your family health records, medicines &amp; appointments</p>
         </div>
 
-        <form method="POST" class="space-y-4">
+        <form method="POST" class="space-y-4" autocomplete="off">
             {% csrf_token %}
             <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Username</label>
-                <input type="text" name="username" required class="form-input" placeholder="Enter username">
+                <input type="text" name="username" required autocomplete="off" class="form-input" placeholder="Enter username">
             </div>
             <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Password</label>
-                <input type="password" name="password" required class="form-input" placeholder="••••••••">
+                <input type="password" name="password" required autocomplete="current-password" class="form-input" placeholder="••••••••">
             </div>
 
             <button type="submit" class="w-full py-3 px-4 rounded-xl text-sm font-bold text-white gradient-accent shadow-md hover:opacity-95 transition">
@@ -29,10 +29,37 @@
             </button>
         </form>
 
-        <div class="text-center pt-2 border-t border-slate-200 text-xs text-slate-600">
-            Don't have an account? 
-            <a href="{% url 'signup' %}" class="font-bold text-teal-600 hover:underline">Create Account</a>
+        <div class="flex items-center justify-between pt-2 border-t border-slate-200 text-xs text-slate-600">
+            <div>
+                Don't have an account? 
+                <a href="{% url 'signup' %}" class="font-bold text-teal-600 hover:underline">Create Account</a>
+            </div>
+            <div>
+                <a href="{% url 'admin_login' %}" class="inline-flex items-center gap-1 font-bold text-purple-700 hover:underline">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Admin Portal
+                </a>
+            </div>
         </div>
-    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function clearLoginFields() {
+        var usernameInput = document.querySelector('input[name="username"]');
+        var passwordInput = document.querySelector('input[name="password"]');
+        if (usernameInput) usernameInput.value = '';
+        if (passwordInput) passwordInput.value = '';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        clearLoginFields();
+        setTimeout(clearLoginFields, 100);
+    });
+
+    window.addEventListener('pageshow', function(event) {
+        clearLoginFields();
+        setTimeout(clearLoginFields, 100);
+    });
+</script>
 {% endblock %}

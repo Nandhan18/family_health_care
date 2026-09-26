@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}User Detail: {{ target_user.username }} - Admin Console - Family Care{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Top Nav Back Link & Hero -->
+    <div>
+        <a href="{% url 'admin_dashboard' %}" class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-purple-700 transition mb-4">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to All Application Users
+        </a>
+
+        <div class="glass-card p-6 sm:p-8 rounded-3xl shadow-xl border border-purple-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr {% if target_user.is_staff or target_user.is_superuser %}from-purple-600 to-indigo-600{% else %}from-teal-500 to-emerald-600{% endif %} text-white font-extrabold text-2xl flex items-center justify-center shadow-lg uppercase">
+                    {{ target_user.username|slice:":2" }}
+                </div>
+                <div>
+                    <div class="flex items-center gap-3">
+                        <h1 class="text-2xl font-extrabold text-slate-900">{{ target_user.username }}</h1>
+                        {% if target_user.is_staff or target_user.is_superuser %}
+                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-purple-100 text-purple-800 border border-purple-200">
+                            <i data-lucide="shield" class="w-3.5 h-3.5"></i> Admin
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                            Standard User
+                        </span>
+                        {% endif %}
+
+                        {% if target_user.is_active %}
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">Active</span>
+                        {% else %}
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-200">Deactivated</span>
+                        {% endif %}
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1">
+                        Email: <strong class="text-slate-700">{{ target_user.email|default:"N/A" }}</strong> | 
+                        Name: <strong class="text-slate-700">{{ target_user.first_name }} {{ target_user.last_name }}</strong>
+                    </p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">
+                        Joined on {{ target_user.date_joined|date:"F j, Y, g:i a" }} | Last Login: {{ target_user.last_login|date:"F j, Y, g:i a"|default:"Never" }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Administrative Actions -->
+            <div class="flex items-center gap-2 shrink-0">
+                {% if target_user != request.user %}
+                <form method="POST" action="{% url 'admin_toggle_staff' target_user.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="px-3 py-2 rounded-xl text-xs font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition flex items-center gap-1">
+                        <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+                        {% if target_user.is_staff %}Demote Admin{% else %}Make Admin{% endif %}
+                    </button>
+                </form>
+
+                <form method="POST" action="{% url 'admin_toggle_active' target_user.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="px-3 py-2 rounded-xl text-xs font-bold {% if target_user.is_active %}text-orange-800 bg-orange-50 hover:bg-orange-100 border border-orange-200{% else %}text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200{% endif %} transition flex items-center gap-1">
+                        <i data-lucide="user-x" class="w-3.5 h-3.5"></i>
+                        {% if target_user.is_active %}Deactivate{% else %}Activate{% endif %}
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- User Data Sections -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Family Members Section -->
+        <div class="glass-card p-6 rounded-2xl border border-slate-200 shadow-md">
+            <h3 class="text-base font-extrabold text-slate-900 mb-4 flex items-center gap-2">
+                <i data-lucide="heart-handshake" class="w-5 h-5 text-teal-600"></i> Family Profiles ({{ members|length }})
+            </h3>
+            {% if members %}
+            <div class="space-y-3">
+                {% for m in members %}
+                <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+                    <div>
+                        <div class="font-extrabold text-slate-800 text-sm">{{ m.name }}</div>
+                        <div class="text-slate-500">{{ m.relation }} • {{ m.age }} yrs • {{ m.gender }} • Blood Group: <strong class="text-teal-700">{{ m.blood_group }}</strong></div>
+                        {% if m.allergies %}<div class="text-[11px] text-red-600 mt-0.5">Allergies: {{ m.allergies }}</div>{% endif %}
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[11px] font-semibold text-slate-500 block">Emergency Contact</span>
+                        <span class="font-mono text-slate-700">{{ m.emergency_contact|default:"None" }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-xs text-slate-500 py-4 text-center">No family members registered under this account.</p>
+            {% endif %}
+        </div>
+
+        <!-- Medical Records Section -->
+        <div class="glass-card p-6 rounded-2xl border border-slate-200 shadow-md">
+            <h3 class="text-base font-extrabold text-slate-900 mb-4 flex items-center gap-2">
+                <i data-lucide="file-text" class="w-5 h-5 text-blue-600"></i> Medical Records ({{ records|length }})
+            </h3>
+            {% if records %}
+            <div class="space-y-3 max-h-72 overflow-y-auto pr-1">
+                {% for r in records %}
+                <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+                    <div class="flex items-center justify-between font-bold text-slate-800">
+                        <span class="text-blue-700">{{ r.record_type }}</span>
+                        <span class="text-[11px] text-slate-400 font-normal">{{ r.date_uploaded|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="text-slate-600 mt-1">For: <strong>{{ r.member.name }}</strong></div>
+                    <p class="text-slate-500 text-[11px] mt-1">{{ r.notes }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-xs text-slate-500 py-4 text-center">No medical records uploaded by this user.</p>
+            {% endif %}
+        </div>
+
+        <!-- Active Medications -->
+        <div class="glass-card p-6 rounded-2xl border border-slate-200 shadow-md">
+            <h3 class="text-base font-extrabold text-slate-900 mb-4 flex items-center gap-2">
+                <i data-lucide="pill" class="w-5 h-5 text-amber-600"></i> Medications ({{ medicines|length }})
+            </h3>
+            {% if medicines %}
+            <div class="space-y-3">
+                {% for med in medicines %}
+                <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs flex items-center justify-between">
+                    <div>
+                        <div class="font-extrabold text-slate-800 text-sm">{{ med.medicine_name }} <span class="text-amber-700 text-xs">({{ med.dosage }})</span></div>
+                        <div class="text-slate-500">For: <strong>{{ med.member.name }}</strong> • Schedule: {{ med.time }}</div>
+                    </div>
+                    <span class="text-[11px] text-slate-400 font-mono">Started: {{ med.start_date|date:"M d, Y" }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-xs text-slate-500 py-4 text-center">No active medications registered.</p>
+            {% endif %}
+        </div>
+
+        <!-- Doctor Appointments -->
+        <div class="glass-card p-6 rounded-2xl border border-slate-200 shadow-md">
+            <h3 class="text-base font-extrabold text-slate-900 mb-4 flex items-center gap-2">
+                <i data-lucide="calendar" class="w-5 h-5 text-indigo-600"></i> Appointments ({{ appointments|length }})
+            </h3>
+            {% if appointments %}
+            <div class="space-y-3">
+                {% for appt in appointments %}
+                <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs flex items-center justify-between">
+                    <div>
+                        <div class="font-extrabold text-slate-800">Dr. {{ appt.doctor_name }} <span class="text-slate-500 font-normal">({{ appt.hospital }})</span></div>
+                        <div class="text-slate-500">Patient: <strong>{{ appt.member.name }}</strong> • Reason: {{ appt.reason }}</div>
+                    </div>
+                    <div class="text-right">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200 block mb-1">{{ appt.status }}</span>
+                        <span class="text-[11px] text-slate-500 font-mono">{{ appt.date|date:"M d, Y" }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-xs text-slate-500 py-4 text-center">No appointments scheduled.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

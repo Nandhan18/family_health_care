@@ -15,9 +15,47 @@ def get_risk_colors(risk):
     else:
         return {'text': 'text-emerald-600', 'bg': 'bg-emerald-500'}
 
+def generate_pointwise_recommendations(member, sys_bp, dia_bp, sugar_level, weight, diabetes_risk, heart_risk, hypertension_risk):
+    """
+    Generates point-wise recommendations formatted as numbered lines 1), 2), 3)...
+    """
+    items = []
+    age = member.age or 35
+    is_child = age < 18
+    is_senior = age >= 60
+
+    if diabetes_risk > 20 or sugar_level >= 100:
+        items.append("Monitor fasting blood sugar weekly and reduce refined carbohydrates.")
+    
+    if heart_risk > 20 or sys_bp >= 130:
+        items.append("Schedule periodic ECG/cardiology checkups and maintain omega-3 fatty acid intake.")
+    
+    if hypertension_risk > 20 or sys_bp >= 130 or dia_bp >= 85:
+        items.append("Limit sodium intake below 2g/day and track morning blood pressure.")
+
+    if not items:
+        items.append("Maintain routine annual health checkups and balanced nutrition with regular hydration.")
+
+    if is_child:
+        items.append("Target at least 60 minutes of daily active physical play and sports.")
+    elif is_senior:
+        items.append("Perform 30 minutes of low-impact walking or gentle yoga 5 days a week.")
+    else:
+        items.append("Target 150 minutes of moderate-intensity aerobic exercise per week.")
+
+    if member.allergies and member.allergies.strip().lower() != 'none':
+        items.append(f"Inform healthcare providers of known sensitivity to {member.allergies} before taking new prescriptions.")
+
+    if member.chronic_conditions and member.chronic_conditions.strip().lower() != 'none':
+        items.append(f"Ensure strict medication adherence for chronic condition: {member.chronic_conditions}.")
+
+    # Number each point cleanly: 1) ..., 2) ..., 3) ...
+    formatted_points = [f"{idx + 1}) {item}" for idx, item in enumerate(items)]
+    return "\n".join(formatted_points)
+
 def calculate_member_risks(member, user):
     """
-    Predicts disease risks using Scikit-Learn Random Forest Classification models.
+    Predicts disease risks using trained ML models and generates point-wise recommendations.
     """
     latest_vitals = HealthMetric.objects.filter(user=user, member=member).order_by('-record_date').first()
     
@@ -40,7 +78,7 @@ def calculate_member_risks(member, user):
             except (ValueError, IndexError):
                 pass
 
-    # Call Scikit-Learn ML engine
+    # Call ML prediction engine
     ml_results = ml_predictor.predict_risk(
         age=member.age,
         gender_str=member.gender,
@@ -55,23 +93,22 @@ def calculate_member_risks(member, user):
     heart_risk = ml_results['heart_disease_risk']
     hypertension_risk = ml_results['hypertension_risk']
 
-    # Dynamic recommendation generation
-    recommendations = []
-    if diabetes_risk > 25:
-        recommendations.append("Monitor fasting blood sugar weekly and reduce refined carbohydrates.")
-    if heart_risk > 20:
-        recommendations.append("Schedule periodic ECG/cardiology checkups and maintain omega-3 fatty acid intake.")
-    if hypertension_risk > 25:
-        recommendations.append("Limit sodium intake below 2g/day and track morning blood pressure.")
-    
-    if not recommendations:
-        recommendations.append("Optimal health indicators. Maintain regular physical activity and balanced nutrition.")
+    recommendations_text = generate_pointwise_recommendations(
+        member=member,
+        sys_bp=sys_bp,
+        dia_bp=dia_bp,
+        sugar_level=sugar_level,
+        weight=weight,
+        diabetes_risk=diabetes_risk,
+        heart_risk=heart_risk,
+        hypertension_risk=hypertension_risk
+    )
 
     return {
         'diabetes_risk': diabetes_risk,
         'heart_disease_risk': heart_risk,
         'hypertension_risk': hypertension_risk,
-        'recommendations': " ".join(recommendations)
+        'recommendations': recommendations_text
     }
 
 @login_required
@@ -87,7 +124,7 @@ def ai_predictions_view(request):
                 member=member,
                 defaults=data
             )
-        messages.success(request, "AI Risk Analysis recalculated using Scikit-Learn Random Forest Classifier Models!")
+        messages.success(request, "AI Health Analysis recalculated successfully!")
         return redirect('ai_predictions')
 
     predictions = []
@@ -100,9 +137,14 @@ def ai_predictions_view(request):
                 member=member,
                 **data
             )
+        
+        # Split recommendation lines into list for line-by-line <br> rendering
+        rec_lines = [line.strip() for line in (pred.recommendations or '').split('\n') if line.strip()]
+
         predictions.append({
             'member': member,
             'prediction': pred,
+            'recommendation_lines': rec_lines,
             'diabetes_color': get_risk_colors(pred.diabetes_risk),
             'heart_color': get_risk_colors(pred.heart_disease_risk),
             'hypertension_color': get_risk_colors(pred.hypertension_risk),

@@ -41,16 +41,26 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <!-- Logo -->
-                <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'landing' %}{% endif %}" class="flex items-center gap-2.5 group">
+                <a href="{% if user.is_authenticated %}{% if user.is_staff or user.is_superuser %}{% url 'admin_dashboard' %}{% else %}{% url 'dashboard' %}{% endif %}{% else %}{% url 'landing' %}{% endif %}" class="flex items-center gap-2.5 group">
                     <div class="w-10 h-10 rounded-xl gradient-accent flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
                         <i data-lucide="heart-pulse" class="w-6 h-6"></i>
                     </div>
-                    <span class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-teal-700 to-indigo-600 bg-clip-text text-transparent">Family Care</span>
+                    <div class="flex flex-col">
+                        <span class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-teal-700 to-indigo-600 bg-clip-text text-transparent">Family Care</span>
+                        {% if user.is_authenticated and user.is_staff or user.is_superuser %}
+                        <span class="text-[10px] uppercase tracking-wider font-extrabold text-purple-600 -mt-1">Admin Console</span>
+                        {% endif %}
+                    </div>
                 </a>
 
                 {% if user.is_authenticated %}
                 <!-- Authenticated Desktop Nav Links -->
                 <nav class="hidden md:flex items-center space-x-1 lg:space-x-2">
+                    {% if user.is_staff or user.is_superuser %}
+                    <a href="{% url 'admin_dashboard' %}" class="px-3 py-2 rounded-lg text-sm font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 transition flex items-center gap-1.5 shadow-sm">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-purple-600"></i> Admin Dashboard
+                    </a>
+                    {% endif %}
                     <a href="{% url 'dashboard' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-teal-600 hover:bg-teal-50 transition">Dashboard</a>
                     <a href="{% url 'family_members' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-teal-600 hover:bg-teal-50 transition">Members</a>
                     <a href="{% url 'medical_records' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-teal-600 hover:bg-teal-50 transition">Records</a>
@@ -67,16 +77,25 @@
 
                 <!-- User Profile & Logout -->
                 <div class="flex items-center gap-3">
+                    {% if user.is_staff or user.is_superuser %}
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                        <i data-lucide="shield" class="w-3.5 h-3.5"></i> Admin: {{ user.username }}
+                    </span>
+                    {% else %}
                     <span class="text-xs font-medium text-slate-500 hidden sm:inline-block">Logged in as <strong class="text-slate-700">{{ user.username }}</strong></span>
+                    {% endif %}
                     <a href="{% url 'logout' %}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">
                         <i data-lucide="log-out" class="w-4 h-4"></i> Logout
                     </a>
                 </div>
                 {% else %}
                 <!-- Public Header Actions -->
-                <div class="flex items-center gap-3">
-                    <a href="{% url 'login' %}" class="px-4 py-2 rounded-lg text-xs font-bold text-slate-700 hover:text-teal-600 transition">Sign In</a>
-                    <a href="{% url 'signup' %}" class="px-4 py-2 rounded-xl text-xs font-bold text-white gradient-accent shadow-md hover:shadow-lg transition">Get Started Free</a>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <a href="{% url 'login' %}" class="px-3 py-2 rounded-lg text-xs font-bold text-slate-700 hover:text-teal-600 transition">Sign In</a>
+                    <a href="{% url 'admin_login' %}" class="px-3 py-2 rounded-lg text-xs font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 transition flex items-center gap-1">
+                        <i data-lucide="shield" class="w-3.5 h-3.5"></i> Admin Portal
+                    </a>
+                    <a href="{% url 'signup' %}" class="px-4 py-2 rounded-xl text-xs font-bold text-white gradient-accent shadow-md hover:shadow-lg transition">Get Started</a>
                 </div>
                 {% endif %}
             </div>

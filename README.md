@@ -61,6 +61,7 @@ npm install
 ---
 
 ## Features
+- **Admin Dashboard & Management Console**: Dedicated administrator portal (`/admin-dashboard/` or `/admin-login/`) with separate admin credentials to inspect all user details, total family members, medical records, medications, appointments, and execute administrative actions (grant/revoke admin status, reset user passwords, activate/deactivate accounts, create or delete user profiles).
 - **Family Profiles**: Store age, gender, blood group, allergies, chronic conditions, and emergency contacts.
 - **Medical Records**: Upload and manage lab reports, doctor notes, prescriptions, and medical imaging documents.
 - **Active Medications**: Dosage schedules and refill tracking.
@@ -68,3 +69,19 @@ npm install
 - **Health Analytics & Vitals**: Track blood pressure, sugar levels (mg/dL), and body weight (kg).
 - **AI Health Insights**: Risk predictions for diabetes, cardiovascular, and hypertension indicators.
 - **Emergency SOS**: 1-touch hotline access and family medical ID cards.
+
+---
+
+## Administrator Access & Credentials
+
+To log into the **Admin Portal**, access `/admin-login/` or click **Admin Portal** from the header navigation bar.
+
+### Default Admin Credentials:
+- **Username**: `Nandhan` (or `admin`)
+- **Password**: `Nandhan1234` (or `admin1234`)
+
+### Create Custom Admin via CLI:
+```bash
+python manage.py create_admin --username <your_username> --password <your_password>
+```
+
