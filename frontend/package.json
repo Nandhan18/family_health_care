@@ -1,0 +1,19 @@
+{
+  "name": "family-care-frontend",
+  "version": "1.0.0",
+  "description": "Frontend UI templates, stylesheets, and scripts for Family Care Health Management System",
+  "main": "static/js/main.js",
+  "scripts": {
+    "dev": "npx serve .",
+    "build": "echo 'Frontend static assets ready'"
+  },
+  "keywords": [
+    "family-care",
+    "health-management",
+    "frontend",
+    "tailwind",
+    "templates"
+  ],
+  "author": "",
+  "license": "ISC"
+}
