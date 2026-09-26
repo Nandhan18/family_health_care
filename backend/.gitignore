@@ -1,0 +1,35 @@
+# Python / Django
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.so
+*.mpy
+
+# Environment & Databases
+.env
+.env.local
+db.sqlite3
+db.sqlite3-journal
+
+# Media & User Uploads
+media/
+!media/.gitkeep
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+
+# Node / JS artifacts (if any)
+node_modules/
+bun.lock
+package-lock.json
+
+# IDE / OS specific
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
